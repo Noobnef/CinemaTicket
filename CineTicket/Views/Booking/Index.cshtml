@@ -66,8 +66,6 @@
                 </div>
             </div>
 
-            
-
             <!-- Tổng tiền -->
             <div class="total-section text-center">
                 <h4>
@@ -88,7 +86,6 @@
         <input type="hidden" name="SeatNumbers" id="selected-seats" />
         <div id="snack-inputs"></div>
     </form>
-
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -163,7 +160,7 @@
                 document.getElementById("selected-seats").value = selectedSeatsArray.join(',');
 
                 // Cập nhật combo đã chọn vào form
-                snackInputsContainer.innerHTML = ""; // clear cũ
+                snackInputsContainer.innerHTML = "";
                 document.querySelectorAll('.snack-checkbox:checked').forEach(cb => {
                     const input = document.createElement("input");
                     input.type = "hidden";
@@ -173,38 +170,16 @@
                 });
             }
 
+            // Submit form trực tiếp mà không dùng confirm()
             bookButton.addEventListener("click", () => {
                 if (selectedSeatsArray.length === 0) {
                     alert("@Localizer["PleaseSelectSeat"]");
                     return;
                 }
 
-                const seatList = selectedSeatsArray.join(', ');
-                const comboItems = Array.from(document.querySelectorAll('.snack-checkbox:checked'))
-                    .map(cb => cb.nextElementSibling.textContent.trim())
-                    .join(', ');
-
-                const seatTotal = selectedSeatsArray.length * seatPrice;
-                let comboTotal = 0;
-                document.querySelectorAll('.snack-checkbox:checked').forEach(cb => {
-                    comboTotal += parseInt(cb.dataset.price || 0);
-                });
-                const total = seatTotal + comboTotal;
-
-                const message =
-                    `🎬 Xác nhận đặt vé\n` +
-                    `Phim: @Html.Raw(Model.MovieTitle.Replace("'", "\\'"))\n` +
-                    `Ghế: ${seatList}\n` +
-                    `Combo: ${comboItems || "Không"}\n` +
-                    `Tổng tiền: ${total.toLocaleString('vi-VN')} VND\n\n` +
-                    `Bạn có muốn tiếp tục đặt vé?`;
-
-                if (confirm(message)) {
-                    document.getElementById("booking-form").submit();
-                }
+                document.getElementById("booking-form").submit();
             });
 
-            // Khởi tạo
             totalPriceElement.textContent = "0";
             bookButton.disabled = true;
         });

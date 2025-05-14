@@ -1,36 +1,105 @@
 ﻿@model List<CineTicket.ViewModels.CartItemViewModel>
 
-<h2 class="mb-4">🛒 Giỏ hàng của bạn</h2>
+<div class="confirmation-page py-4">
+    <div class="confirmation-header text-center mb-5">
+        <div class="d-inline-block position-relative">
+            <h2 class="confirmation-title mb-0">
+                <span class="ticket-icon">🎟️</span> Xác nhận vé
+            </h2>
+            <div class="title-decoration"></div>
+        </div>
+    </div>
 
-@if (!Model.Any())
-{
-    <div class="alert alert-info">Chưa có đơn đặt nào.</div>
-}
-else
-{
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Phim</th>
-                <th>Suất chiếu</th>
-                <th>Ghế</th>
-                <th>Combo</th>
-                <th>Tổng tiền</th>
-                <th>Ngày đặt</th>
-            </tr>
-        </thead>
-        <tbody>
+    @if (!Model.Any())
+    {
+        <div class="empty-cart text-center py-5">
+            <div class="empty-cart-icon mb-3">🛒</div>
+            <h3 class="fw-light mb-3">Giỏ hàng trống</h3>
+            <p class="text-muted mb-4">Bạn chưa có đơn đặt vé nào</p>
+            <a href="/Movies" class="btn btn-primary">Khám phá phim hay</a>
+        </div>
+    }
+    else
+    {
+        <div class="tickets-container">
             @foreach (var item in Model)
             {
-                <tr>
-                    <td>@item.MovieTitle</td>
-                    <td>@item.Showtime.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@item.SeatNumbers</td>
-                    <td>@string.Join(", ", item.SnackNames)</td>
-                    <td>@item.TotalAmount.ToString("N0") VND</td>
-                    <td>@item.BookingDate.ToString("dd/MM/yyyy HH:mm")</td>
-                </tr>
+                <div class="ticket-card mb-4">
+                    <div class="ticket-header">
+                        <div class="movie-info">
+                            <h3 class="movie-title">@item.MovieTitle</h3>
+                            <div class="showtime">
+                                <i class="bi bi-calendar3"></i> @item.Showtime.ToString("dd/MM/yyyy")
+                                <span class="mx-2">•</span>
+                                <i class="bi bi-clock"></i> @item.Showtime.ToString("HH:mm")
+                            </div>
+                        </div>
+                        <div class="total-amount">
+                            @item.TotalAmount.ToString("N0") <span>VND</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-body">
+                        <div class="ticket-detail-row">
+                            <div class="detail-label">
+                                <i class="bi bi-chair"></i> Ghế
+                            </div>
+                            <div class="detail-value seat-numbers">
+                                @foreach (var seat in item.SeatNumbers.Split(','))
+                                {
+                                    <span class="seat-tag">@seat.Trim()</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="ticket-detail-row">
+                            <div class="detail-label">
+                                <i class="bi bi-cup-straw"></i> Combo
+                            </div>
+                            <div class="detail-value">
+                                @if (item.SnackNames.Any())
+                                {
+                                    @foreach (var snack in item.SnackNames)
+                                    {
+                                        <span class="snack-tag">@snack</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Không có combo</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="ticket-detail-row">
+                            <div class="detail-label">
+                                <i class="bi bi-calendar-check"></i> Ngày đặt
+                            </div>
+                            <div class="detail-value">
+                                @item.BookingDate.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ticket-actions">
+                        <button class="btn action-btn print-btn" onclick="window.print()">
+                            <i class="bi bi-printer"></i> In vé
+                        </button>
+                        <button class="btn action-btn download-btn" onclick="saveAsPDF()">
+                            <i class="bi bi-download"></i> Tải xuống
+                        </button>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
-}
+        </div>
+    }
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="~/css/cart.css" rel="stylesheet" />
+
+<script>
+    function saveAsPDF() {
+        alert('Tính năng tải xuống PDF sẽ được triển khai trong tương lai.');
+    }
+</script>

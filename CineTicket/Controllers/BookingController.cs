@@ -23,6 +23,7 @@ public class BookingController : Controller
         _gmailSender = gmailSender;
     }
 
+    // Chọn suất chiếu
     public IActionResult Index(int movieId, int? showtimeId)
     {
         var movie = _context.Movies.FirstOrDefault(m => m.Id == movieId);
@@ -72,6 +73,7 @@ public class BookingController : Controller
         return View(booking);
     }
 
+    // Xác nhận đặt vé
     [HttpPost]
     public async Task<IActionResult> ConfirmBooking(BookingViewModel model)
     {
@@ -84,6 +86,7 @@ public class BookingController : Controller
         var userId = User.Identity.IsAuthenticated ? _userManager.GetUserId(User) : null;
         decimal totalPrice = model.TicketPrice * seats.Length;
 
+        // Thêm vé vào cơ sở dữ liệu
         foreach (var seat in seats)
         {
             var ticket = new Ticket
@@ -97,6 +100,7 @@ public class BookingController : Controller
             _context.Tickets.Add(ticket);
         }
 
+        // Thêm bắp nước
         if (model.SelectedSnackIds != null && model.SelectedSnackIds.Any())
         {
             foreach (var snackId in model.SelectedSnackIds)
@@ -119,6 +123,7 @@ public class BookingController : Controller
             }
         }
 
+        // Lưu vào lịch sử đặt vé
         var history = new BookingHistory
         {
             UserId = userId,
@@ -131,6 +136,7 @@ public class BookingController : Controller
 
         await _context.SaveChangesAsync();
 
+        // Gửi email xác nhận
         var movie = await _context.Movies.FindAsync(model.MovieId);
         var pdfBytes = GenerateTicketPdf(movie.Title, model.SeatNumbers, totalPrice);
 
@@ -144,40 +150,55 @@ public class BookingController : Controller
                 pdfBytes, "ve-phim.pdf");
         }
 
-        return RedirectToAction("Success");
+        return RedirectToAction("Cart");
     }
 
+    // Giỏ hàng
     [Authorize]
     public async Task<IActionResult> Cart()
     {
         var userId = _userManager.GetUserId(User);
 
-        var histories = await _context.BookingHistories
+        var latestHistory = await _context.BookingHistories
             .Where(h => h.UserId == userId)
             .Include(h => h.Showtime)
+                .ThenInclude(s => s.Movie)
             .OrderByDescending(h => h.BookingDate)
-            .Select(h => new CartItemViewModel
-            {
-                MovieTitle = h.Showtime.Movie.Title,
-                Showtime = h.Showtime.StartTime,
-                SeatNumbers = h.SeatNumbers,
-                TotalAmount = h.TotalAmount,
-                BookingDate = h.BookingDate,
-                SnackNames = _context.SnackOrder
-                                .Where(s => s.UserId == userId && s.ShowtimeId == h.ShowtimeId && s.BookingTime == h.BookingDate)
-                                .Select(s => s.Snack.Name)
-                                .ToList()
-            })
-            .ToListAsync();
+            .FirstOrDefaultAsync();
 
-        return View(histories);
+        if (latestHistory == null)
+        {
+            return View(new List<CartItemViewModel>());
+        }
+
+        var cartItem = new CartItemViewModel
+        {
+            MovieTitle = latestHistory.Showtime.Movie.Title,
+            Showtime = latestHistory.Showtime.StartTime,
+            SeatNumbers = latestHistory.SeatNumbers,
+            TotalAmount = latestHistory.TotalAmount,
+            BookingDate = latestHistory.BookingDate,
+            SnackNames = await _context.SnackOrder
+                .Where(s => s.UserId == userId
+                         && s.ShowtimeId == latestHistory.ShowtimeId
+             && EF.Functions.DateDiffSecond(s.BookingTime, latestHistory.BookingDate) <= 5)
+                .Include(s => s.Snack)
+                .Select(s => s.Snack.Name)
+                .ToListAsync()
+        };
+
+        return View(new List<CartItemViewModel> { cartItem });
     }
 
+
+
+    // Trang thành công
     public IActionResult Success()
     {
         return View();
     }
 
+    // Tạo PDF vé
     private byte[] GenerateTicketPdf(string movie, string seats, decimal amount)
     {
         using var ms = new MemoryStream();
@@ -201,3 +222,4 @@ public class BookingController : Controller
         return ms.ToArray();
     }
 }
+
