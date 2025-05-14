@@ -1,0 +1,36 @@
+﻿@model List<CineTicket.ViewModels.CartItemViewModel>
+
+<h2 class="mb-4">🛒 Giỏ hàng của bạn</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Chưa có đơn đặt nào.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Phim</th>
+                <th>Suất chiếu</th>
+                <th>Ghế</th>
+                <th>Combo</th>
+                <th>Tổng tiền</th>
+                <th>Ngày đặt</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MovieTitle</td>
+                    <td>@item.Showtime.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.SeatNumbers</td>
+                    <td>@string.Join(", ", item.SnackNames)</td>
+                    <td>@item.TotalAmount.ToString("N0") VND</td>
+                    <td>@item.BookingDate.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

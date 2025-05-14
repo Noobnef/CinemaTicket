@@ -1,0 +1,113 @@
+﻿/* Improved Admin Sidebar */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    background: linear-gradient(to bottom, #2c3e50, #1a252f);
+    color: white;
+    padding-top: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+    .sidebar-header .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 5px;
+    }
+
+    .sidebar-header .subtitle {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+.sidebar ul {
+    list-style: none;
+    padding: 15px 0;
+    margin: 0;
+}
+
+    .sidebar ul li {
+        padding: 0;
+        margin-bottom: 5px;
+    }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+            .sidebar ul li a:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #fff;
+                border-left: 3px solid #3498db;
+            }
+
+            .sidebar ul li a.active {
+                background-color: rgba(255, 255, 255, 0.15);
+                color: #fff;
+                border-left: 3px solid #3498db;
+            }
+
+            .sidebar ul li a i {
+                margin-right: 10px;
+                width: 20px;
+                text-align: center;
+            }
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive sidebar */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 70px;
+        overflow: hidden;
+    }
+
+        .sidebar ul li a span {
+            display: none;
+        }
+
+        .sidebar ul li a i {
+            margin-right: 0;
+            font-size: 18px;
+        }
+
+    .sidebar-header, .sidebar-footer {
+        display: none;
+    }
+
+    .content {
+        margin-left: 90px;
+    }
+}
+
+/* Update content margin to match new sidebar width */
+.content {
+    margin-left: 280px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}

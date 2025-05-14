@@ -1,0 +1,20 @@
+﻿@model CineTicket.Models.Showtime
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Xóa suất chiếu";
+}
+
+<h2>Bạn có chắc muốn xóa suất chiếu?</h2>
+
+<div class="mb-3">
+    <strong>Phim:</strong> @Model.Movie.Title <br />
+    <strong>Phòng:</strong> @Model.Room.Name <br />
+    <strong>Thời gian:</strong> @Model.StartTime.ToString("dd/MM/yyyy HH:mm")
+</div>
+
+<form asp-action="Delete" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

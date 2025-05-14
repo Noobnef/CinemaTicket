@@ -1,0 +1,28 @@
+﻿@model CineTicket.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Xóa người dùng";
+}
+
+<h2 class="text-danger">Xóa người dùng</h2>
+
+<h4>Bạn có chắc chắn muốn xóa tài khoản này?</h4>
+
+<div class="border p-4 rounded bg-light">
+    <dl class="row">
+        <dt class="col-sm-3">Họ tên</dt>
+        <dd class="col-sm-9">@Model.FullName</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+
+        <dt class="col-sm-3">Vai trò</dt>
+        <dd class="col-sm-9">@Model.Role</dd>
+    </dl>
+
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>

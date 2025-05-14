@@ -1,0 +1,39 @@
+﻿@model IEnumerable<CineTicket.Models.ApplicationUser>
+
+<h2>Danh sách người dùng theo quyền</h2>
+
+@foreach (var roleGroup in new[] { "Admin", "Company", "Employee", "Customer" })
+{
+    var usersInRole = Model.Where(u => u.Role == roleGroup).ToList();
+    if (usersInRole.Any())
+    {
+        <h3 class="mt-4 text-primary"> @roleGroup (@usersInRole.Count)</h3>
+
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Tên Người Dùng</th>
+                    <th>Email</th>
+                    <th>Tên tài khoản</th>
+                    <th>Quyền</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in usersInRole)
+                {
+                    <tr>
+                        <td>@user.FullName</td>
+                        <td>@user.Email</td>
+                        <td>@user.UserName</td>
+                        <td>@user.Role</td>
+                        <td>
+                            <a asp-action="ManageRoles" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Chỉnh sửa quyền</a>
+                            <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger">Xóa</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}

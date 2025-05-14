@@ -1,0 +1,25 @@
+﻿@model CineTicket.Models.Ticket
+@{
+    ViewData["Title"] = "Xoá vé";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<h4>Bạn có chắc muốn xoá vé sau?</h4>
+
+<ul class="list-group mb-3">
+    <li class="list-group-item">
+        <strong>Phim / Suất:</strong>
+        @Model.Showtimes?.Movie?.Title -
+        @Model.Showtimes?.StartTime.ToString("dd/MM/yyyy HH:mm")
+    </li>
+    <li class="list-group-item"><strong>Ghế:</strong> @Model.SeatNumber</li>
+    <li class="list-group-item"><strong>Giá:</strong> @Model.Price.ToString("N0") đ</li>
+    <li class="list-group-item"><strong>Người đặt:</strong> @Model.User?.Email</li>
+</ul>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Xoá</button>
+    <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+</form>

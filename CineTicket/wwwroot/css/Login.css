@@ -1,0 +1,461 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+
+:root {
+    --mainColor: crimson;
+    --black: #000;
+    --white: #fff;
+    --whiteSmoke: #C4C3CA;
+    --shadow: 0 4px 8px rgba(21,21,21,.2);
+}
+
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Lato',sans-serif;
+    background: var(--black);
+    color: var(--white);
+    line-height: 1.5;
+    letter-spacing: .5px;
+    font-size: 16px;
+}
+
+a {
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+}
+
+/* GRID UTIL */
+.container {
+    max-width: 1080px;
+    margin: auto;
+    padding: 0 15px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.full-screen {
+    min-height: 100vh;
+    padding-top: 100px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* NAVBAR */
+nav.navbar {
+    width: 100%;
+    background: var(--black);
+    position: fixed;
+    z-index: 999;
+    padding: 25px 0;
+}
+
+nav .logo {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+    nav .logo span {
+        color: var(--mainColor);
+    }
+
+nav .menu-btn i {
+    color: var(--white);
+    font-size: 28px;
+    display: none;
+    cursor: pointer;
+}
+
+nav ul {
+    display: flex;
+    align-items: center;
+}
+
+    nav ul li {
+        margin-left: 20px;
+    }
+
+        nav ul li a {
+            color: var(--white);
+            padding: 8px 15px;
+            font-weight: 600;
+            border-radius: 5px;
+            transition: .3s;
+        }
+
+            nav ul li a.active,
+            nav ul li a:hover {
+                background: var(--white);
+                color: var(--mainColor);
+            }
+
+/* ───────── LEFT & RIGHT COLUMNS ───────── */
+.left, .right {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 20px
+}
+
+    .left .line {
+        width: 15%;
+        height: 2px;
+        background: var(--mainColor);
+        display: inline-block
+    }
+
+    .left h2 {
+        margin-top: 25px;
+        font-size: 50px;
+        line-height: 1.1
+    }
+
+        .left h2 span {
+            color: var(--mainColor)
+        }
+
+    .left p {
+        margin: 20px 0 10px;
+        color: var(--whiteSmoke)
+    }
+
+/* ───────── SOCIAL MEDIA ───────── */
+.social-media {
+    margin-top: 60px
+}
+
+    .social-media a {
+        margin-right: 22px;
+        font-size: 22px;
+        transition: .2s
+    }
+
+        .social-media a:hover {
+            color: var(--mainColor)
+        }
+
+/* ───────── BUTTON ───────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 30px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--white);
+    background: var(--mainColor);
+    border: none;
+    border-radius: 4px;
+    margin-top: 15px;
+    box-shadow: 0 8px 24px rgba(228,10,57,.2);
+    transition: .2s
+}
+
+    .btn:hover {
+        background: var(--white);
+        color: var(--mainColor);
+        box-shadow: 0 8px 24px rgba(138,140,146,.2)
+    }
+
+/* ───────── FORM WRAPPER ───────── */
+.form {
+    width: 100%;
+    display: flex;
+    justify-content: center
+}
+
+.right h6 {
+    margin-bottom: 30px;
+    font-size: 16px;
+    color: var(--white)
+}
+
+    .right h6 span {
+        padding: 0 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        cursor: pointer
+    }
+
+/* helper hover for register / login title */
+.register-title, .login-title {
+    cursor: pointer;
+    transition: .3s
+}
+
+    .register-title:hover, .login-title:hover {
+        color: var(--mainColor)
+    }
+
+/* ───────── TOGGLE (checkbox arrow) ───────── */
+input[type="checkbox"] {
+    display: none
+}
+
+.checkbox + label, .checkbox + .flip-arrow {
+    display: block;
+    width: 60px;
+    height: 16px;
+    margin: 10px auto;
+    border-radius: 8px;
+    background: var(--mainColor);
+    position: relative;
+    pointer-events: none
+}
+
+    .checkbox + label::before, .flip-arrow::before {
+        content: '\f1e2';
+        font-family: 'Material Icons';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--white);
+        color: var(--mainColor);
+        font-size: 24px;
+        line-height: 36px;
+        text-align: center;
+        transition: .4s;
+        pointer-events: none
+    }
+
+/* ───────── CARD 3D ───────── */
+.card-3d-wrap {
+    position: relative;
+    width: 400px;
+    max-width: 100%;
+    height: 500px;
+    margin-top: 60px;
+    perspective: 800px;
+    transform-style: preserve-3d
+}
+
+.card-3d-wrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: none
+}
+
+.card-front, .card-back {
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    background: #1B1B1B url('https://i.postimg.cc/4dnZCH03/background.png') bottom center/300% no-repeat;
+    display: flex;
+    align-items: center;
+    backface-visibility: hidden
+}
+
+.card-front {
+    cursor: pointer;
+    z-index: 1
+}
+
+.card-back {
+    transform: rotateY(180deg)
+}
+
+/* ───────── INNER WRAP & FORM ───────── */
+.center-wrap {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    padding: 0 35px;
+    transform: translate3d(0,-50%,35px);
+    z-index: 20
+}
+
+.heading {
+    font-size: 24px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: var(--white)
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 15px
+}
+
+.form-style {
+    width: 100%;
+    height: 48px;
+    padding: 13px 20px 13px 55px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    background: #242323;
+    color: var(--whiteSmoke);
+    box-shadow: var(--shadow);
+    outline: none;
+    letter-spacing: .5px
+}
+
+    .form-style:focus {
+        border: 1px solid var(--mainColor);
+        box-shadow: 0 0 0 2px rgba(220,20,60,.3)
+    }
+
+    .form-style::placeholder {
+        color: var(--whiteSmoke);
+        opacity: .7;
+        transition: .2s
+    }
+
+    .form-style:focus::placeholder {
+        opacity: 0
+    }
+
+/* icon inside input */
+.input-icon {
+    position: absolute;
+    top: 12px;
+    left: 18px;
+    font-size: 24px;
+    color: var(--mainColor);
+    pointer-events: none
+}
+
+/* adjust when no icon */
+.no-icon .form-style {
+    padding-left: 20px
+}
+
+/* SELECT */
+select.form-control {
+    width: 100%;
+    padding: 13px 20px;
+    background: #242323;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    color: var(--whiteSmoke);
+    font-weight: 500;
+    font-size: 14px;
+    appearance: none;
+    box-shadow: var(--shadow);
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D'10'%20height%3D'7'%20xmlns%3D'http://www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M0%200l5%207%205-7z' fill='%23ffffff'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px
+}
+
+/* VALIDATION */
+.text-danger {
+    color: #ff4d4d;
+    font-size: 13px;
+    margin-top: 5px;
+    display: block
+}
+
+input.input-validation-error, select.input-validation-error {
+    border: 1px solid #ff4d4d !important;
+    background: #2d1a1a !important
+}
+
+/* LINK */
+.link {
+    display: block;
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--whiteSmoke);
+    text-align: center
+}
+
+    .link:hover {
+        color: var(--mainColor)
+    }
+
+/* ───────── RESPONSIVE ───────── */
+@media(max-width:992px) {
+    nav .menu-btn i {
+        display: block
+    }
+
+    nav ul {
+        position: fixed;
+        top: 85px;
+        left: -100%;
+        width: 100%;
+        height: 320px;
+        background: #1B1B1B;
+        text-align: center;
+        display: block;
+        transition: left .3s
+    }
+
+    #click:checked ~ ul {
+        left: 0
+    }
+
+    nav ul li {
+        margin: 20px 0
+    }
+
+        nav ul li a {
+            display: block;
+            font-size: 20px
+        }
+
+    .left h2 {
+        font-size: 40px
+    }
+
+    .card-3d-wrap {
+        width: 350px;
+        height: 500px
+    }
+}
+
+@media(max-width:768px) {
+    .left, .right {
+        flex: 0 0 100%;
+        max-width: 100%
+    }
+
+    .left {
+        order: 2;
+        text-align: center;
+        display: grid;
+        place-items: center
+    }
+
+    .right {
+        order: 1
+    }
+
+    .left h2 {
+        font-size: 36px
+    }
+}
+
+@media(max-width:400px) {
+    .left h2

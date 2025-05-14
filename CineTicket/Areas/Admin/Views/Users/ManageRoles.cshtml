@@ -1,0 +1,36 @@
+﻿@model CineTicket.Models.ManageUserRolesViewModel
+
+<h2>Quản lý quyền của @Model.UserEmail</h2>
+
+<form asp-action="ManageRoles" method="post">
+    <input type="hidden" asp-for="UserId" />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Vai trò</th>
+                <th>Chọn quyền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Roles.Count; i++)
+            {
+                <tr>
+                    <td>
+                        @Model.Roles[i].RoleName
+                        <input type="hidden" asp-for="Roles[i].RoleName" />
+                    </td>
+                    <td>
+                        <input type="radio"
+                               asp-for="SelectedRole"
+                               value="@Model.Roles[i].RoleName"
+                               class="form-check-input" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Lưu thay đổi</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

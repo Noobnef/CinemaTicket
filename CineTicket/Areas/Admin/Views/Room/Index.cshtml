@@ -1,0 +1,33 @@
+﻿@model IEnumerable<CineTicket.Models.Room>
+@{
+    ViewData["Title"] = "Danh Sách Phòng";
+}
+<h2>@ViewData["Title"]</h2>
+<p>
+    <a asp-action="Create" class="btn btn-success">+ Tạo phòng mới</a>
+</p>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tên phòng</th>
+            <th>Số ghế</th>
+            <th>Giá vé</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var room in Model)
+        {
+            <tr>
+                <td>@room.Name</td>
+                <td>@room.SeatCount</td>
+                <td>@string.Format("{0:N0} VNĐ", room.TicketPrice)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@room.Id" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="Details" asp-route-id="@room.Id" class="btn btn-info btn-sm">Chi tiết</a>
+                    <a asp-action="Delete" asp-route-id="@room.Id" class="btn btn-danger btn-sm">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

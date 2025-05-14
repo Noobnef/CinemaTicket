@@ -1,0 +1,30 @@
+﻿@model CineTicket.Models.Room
+@{
+    ViewData["Title"] = "Chỉnh Sửa Phòng";
+}
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Edit">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="SeatCount" class="form-label"></label>
+        <input asp-for="SeatCount" class="form-control" />
+        <span asp-validation-for="SeatCount" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="TicketPrice" class="form-label"></label>
+        <input asp-for="TicketPrice" class="form-control" />
+        <span asp-validation-for="TicketPrice" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>
+
+<hr />
+<partial name="_ValidationScriptsPartial" />
+

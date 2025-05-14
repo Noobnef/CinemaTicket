@@ -1,0 +1,57 @@
+﻿@model CineTicket.Models.Movie
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>Chỉnh sửa phim</h2>
+
+<form asp-area="Admin" asp-controller="Movies" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label fw-bold"></label>
+        <input asp-for="Title" class="form-control rounded-pill" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label fw-bold"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Genre" class="form-label fw-bold"></label>
+        <input asp-for="Genre" class="form-control rounded-pill" />
+        <span asp-validation-for="Genre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ReleaseDate" class="form-label fw-bold"></label>
+        <input asp-for="ReleaseDate" type="date" class="form-control rounded-pill" />
+        <span asp-validation-for="ReleaseDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Duration" class="form-label fw-bold"></label>
+        <input asp-for="Duration" class="form-control rounded-pill" />
+        <span asp-validation-for="Duration" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PosterUrl" class="form-label fw-bold"></label>
+        <input asp-for="PosterUrl" class="form-control rounded-pill" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BannerUrl" class="form-label fw-bold"></label>
+        <input asp-for="BannerUrl" class="form-control rounded-pill" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

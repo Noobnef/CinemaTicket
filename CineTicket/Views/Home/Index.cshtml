@@ -1,0 +1,64 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@model List<CineTicket.Models.Movie>
+@{
+    ViewData["Title"] = "Trang chủ - CineTicket";
+}
+
+<link href="~/css/dardmode.css" rel="stylesheet" />
+<link href="~/css/lightmode.css" rel="stylesheet" />
+<link href="~/css/homepage.css" rel="stylesheet" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <h1 class="hero-title">@Localizer["HeroTitle"]</h1>
+        <p class="hero-subtitle">@Localizer["HeroSubtitle"]</p>
+        <a href="@Url.Action("Index", "Movie")" class="hero-btn">
+            <i class="fas fa-film me-2"></i> @Localizer["ViewAllMovies"]
+        </a>
+    </div>
+</div>
+
+<!-- Featured Movies Section -->
+<div class="container">
+    <h2 class="section-title">@Localizer["FeaturedMovies"]</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="movie-container">
+            @foreach (var movie in Model.Take(4))
+            {
+                <div class="movie-card">
+                    <div class="movie-poster">
+                        @if (!string.IsNullOrEmpty(movie.PosterUrl))
+                        {
+                            <img src="@movie.PosterUrl" alt="@movie.Title" />
+                        }
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">@movie.Title</h3>
+                        <div class="movie-genre">@movie.Genre</div>
+                        <div class="movie-meta">
+                            <span><i class="far fa-calendar-alt me-1"></i> @movie.ReleaseDate.ToString("dd/MM/yyyy")</span>
+                            <span><i class="far fa-clock me-1"></i> @movie.Duration @Localizer["Minutes"]</span>
+                        </div>
+                        <p class="movie-description">@movie.Description</p>
+                        <a href="@Url.Action("Details", "Movie", new { id = movie.Id })" class="movie-btn">@Localizer["Details"]</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="view-all-container">
+        <a href="@Url.Action("Index", "Movie")" class="hero-btn">
+            <i class="fas fa-film me-2"></i> @Localizer["ViewAllMovies"]
+        </a>
+    </div>
+</div>
+
+
+
+<script src="~/js/movie.js"></script>

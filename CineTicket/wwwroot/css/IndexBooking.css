@@ -1,0 +1,138 @@
+﻿/* ======= BIẾN MÀU GIAO DIỆN ======= */
+:root {
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --text: #333;
+    --screen-bg: linear-gradient(to right, #2c3e50, #3498db);
+    --seat-bg: #e0e0e0;
+    --seat-label: rgba(0, 0, 0, 0.6);
+    --total-bg: #f9f9f9;
+}
+
+body.dark-mode {
+    --bg: #121212;
+    --card-bg: #1e1e2f;
+    --text: #f1f1f1;
+    --screen-bg: linear-gradient(to right, #1e1e1e, #3498db);
+    --seat-bg: #444;
+    --seat-label: rgba(255, 255, 255, 0.7);
+    --total-bg: #2a2a3a;
+}
+/* ======= GIAO DIỆN CHUNG ======= */
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+.theater-card {
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.screen {
+    background: var(--screen-bg);
+    color: white;
+    display: flex;
+    align-items: center; /* căn giữa theo chiều dọc */
+    justify-content: center; /* căn giữa theo chiều ngang */
+    padding: 15px;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    width: auto; /* Ghi đè định nghĩa width khác */
+    height: auto; /* Ghi đè định nghĩa height khác */
+}
+
+.seat-container {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.seat {
+    aspect-ratio: 1/1;
+    background-color: var(--seat-bg);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+    .seat:hover:not(.occupied) {
+        transform: scale(1.05);
+        border-color: #6c5ce7;
+    }
+
+    .seat.selected {
+        background-color: #6c5ce7;
+        color: white;
+        border-color: #6c5ce7;
+    }
+
+    .seat.occupied {
+        background-color: #d63031;
+        cursor: not-allowed;
+        color: white;
+        opacity: 0.85;
+    }
+
+.seat-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: var(--seat-label);
+    pointer-events: none;
+}
+/* ======= CHÚ GIẢI ======= */
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+    .legend .seat {
+        width: 25px;
+        height: 25px;
+    }
+/* ======= TỔNG TIỀN ======= */
+.total-section {
+    margin-top: 20px;
+    background-color: var(--total-bg);
+    padding: 15px;
+    border-radius: 10px;
+}
+/* Định nghĩa rõ ràng cho phần tổng tiền */
+#total-price {
+    display: inline-block;
+    font-weight: bold;
+    min-width: 60px; /* Đảm bảo rộng đủ để hiển thị số 0 */
+}
+
+.combo-section .form-check-input:checked + .form-check-label {
+    color: #0d6efd;
+}
+
+.combo-section .card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}

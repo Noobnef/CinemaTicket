@@ -1,0 +1,33 @@
+﻿@page
+@model VerifyOtpModel
+@{
+    ViewData["Title"] = "Xác thực mã OTP";
+}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px;">
+        <div class="text-center mb-4">
+            <h2 class="text-danger fw-bold">🔐 Xác thực mã OTP</h2>
+            <p class="text-muted">Nhập mã OTP đã được gửi đến email <br /><b>@Model.Input.Email</b></p>
+        </div>
+
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Input.OTP" class="form-label fw-semibold">Mã OTP</label>
+                <input asp-for="Input.OTP" class="form-control form-control-lg text-center" placeholder="Nhập mã OTP..." />
+                <span asp-validation-for="Input.OTP" class="text-danger"></span>
+            </div>
+
+            <input type="hidden" asp-for="Input.UserId" />
+            <input type="hidden" asp-for="Input.Email" />
+
+            <button type="submit" class="btn btn-danger btn-lg w-100 mt-2">Xác thực</button>
+        </form>
+
+        <div class="text-center text-muted mt-3" style="font-size: 0.9em;">
+            Nếu bạn không nhận được mã OTP, vui lòng kiểm tra hộp thư rác hoặc thử lại sau.
+        </div>
+    </div>
+</div>

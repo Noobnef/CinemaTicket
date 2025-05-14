@@ -1,0 +1,63 @@
+﻿/* Base styles */
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.movie-details-container {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.movie-poster img {
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.movie-info-card {
+    background-color: var(--card-background);
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+}
+
+.movie-info-header h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--heading-color);
+}
+
+.detail-row {
+    margin-bottom: 1rem;
+}
+
+.btn-book {
+    background-color: #e74c3c;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+    .btn-book:hover {
+        background-color: #c0392b;
+    }
+
+/* Light Mode */
+:root {
+    --background-color: #f8f9fa;
+    --text-color: #212529;
+    --card-background: #ffffff;
+    --heading-color: #1a1a1a;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --card-background: #1f1f1f;
+    --heading-color: #ffffff;
+}

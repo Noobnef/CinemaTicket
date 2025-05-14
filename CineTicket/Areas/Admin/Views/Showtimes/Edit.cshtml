@@ -1,0 +1,44 @@
+﻿@model CineTicket.Models.Showtime
+@{
+    ViewData["Title"] = "Cập nhật suất chiếu";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="MovieId" class="form-label"></label>
+            <select asp-for="MovieId" asp-items="ViewBag.Movies" class="form-select"></select>
+            <span asp-validation-for="MovieId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="RoomId" class="form-label"></label>
+            <select asp-for="RoomId" asp-items="ViewBag.Rooms" class="form-select"></select>
+            <span asp-validation-for="RoomId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="StartTime" class="form-label"></label>
+            <input asp-for="StartTime"
+                   type="datetime-local"
+                   class="form-control"
+                   value="@Model.StartTime.ToString("yyyy-MM-ddTHH:mm")" />
+            <span asp-validation-for="StartTime" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">Cập nhật</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

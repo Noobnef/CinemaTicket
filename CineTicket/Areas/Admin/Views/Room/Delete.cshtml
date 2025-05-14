@@ -1,0 +1,21 @@
+﻿@model CineTicket.Models.Room
+
+@{
+    ViewData["Title"] = "Xoá Phòng";
+}
+
+<h1>Xoá Phòng</h1>
+
+<div class="alert alert-warning">
+    <p>Bạn có chắc muốn xoá phòng này?</p>
+    <ul>
+        <li>Tên phòng: @Model.Name</li>
+        <li>Số ghế: @Model.SeatCount</li>
+        <li>Giá vé: @Model.TicketPrice</li>
+    </ul>
+</div>
+
+<form method="post" asp-action="DeleteConfirmed" asp-route-id="@Model.Id">
+    <button type="submit" class="btn btn-danger">Xoá</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>

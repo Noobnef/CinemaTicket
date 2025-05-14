@@ -1,0 +1,19 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = "Đặt vé thành công";
+}
+<link href="~/css/darkmode.css" rel="stylesheet" />
+<link href="~/css/lightmode.css" rel="stylesheet" />
+@* <h2>@Localizer["Title"]!</h2> *@
+@* <p>@Localizer["Message"]</p> *@
+
+<div class="container py-5 text-center">
+    <div class="alert alert-success shadow-lg p-4 rounded">
+        <h2 class="mb-4"><i class="fas fa-check-circle text-success me-2"></i>Đặt vé thành công!</h2>
+        <p class="lead">Cảm ơn bạn đã sử dụng dịch vụ CineTicket.</p>
+        <p>Thông tin vé đã được gửi đến email của bạn.</p>
+        <p>Vui lòng kiểm tra email để xác nhận.</p>
+
+
+<a href="@Url.Action("Index", "Movie")" class="btn btn-secondary">@Localizer["BackToMovies"]</a>
+<script src="~/js/movie.js"></script>

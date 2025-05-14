@@ -1,0 +1,214 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@model CineTicket.Models.BookingViewModel
+
+@{
+    var bookedSeatsJson = Newtonsoft.Json.JsonConvert.SerializeObject(Model.AlreadyBookedSeats ?? new List<string>());
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>@Localizer["SelectedSeat"] - @Model.MovieTitle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/darkmode.css" rel="stylesheet" />
+    <link href="~/css/lightmode.css" rel="stylesheet" />
+    <link href="~/css/indexbooking.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container py-5">
+        <div class="theater-card mx-auto" style="max-width: 850px;">
+            <h2 class="text-center mb-4">@Localizer["SelectedSeat"] - @Model.MovieTitle</h2>
+            <div class="screen">@Localizer["SCREEN"]</div>
+
+            <!-- Ghế -->
+            <div class="seat-container" id="seat-container"></div>
+
+            <!-- Chú thích -->
+            <div class="legend">
+                <span><div class="seat"></div>@Localizer["AvailableSeat"]</span>
+                <span><div class="seat selected"></div>@Localizer["SelectedSeat"]</span>
+                <span><div class="seat occupied"></div>@Localizer["BookedSeat"]</span>
+            </div>
+
+            <!-- Bắp nước -->
+            <div class="combo-section mt-5 p-4 rounded-3 shadow-sm">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="fs-4 me-2">🍿</span>
+                    <h4 class="mb-0 fw-bold">Chọn combo bắp nước</h4>
+                </div>
+
+                <div class="row row-cols-1 row-cols-md-2 g-3 mt-2">
+                    @foreach (var snack in Model.AvailableSnacks)
+                    {
+                        <div class="col">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="form-check form-check-inline m-0 flex-grow-1">
+                                        <input class="form-check-input snack-checkbox"
+                                               type="checkbox"
+                                               name="SelectedSnackIds"
+                                               value="@snack.Id"
+                                               data-price="@snack.Price"
+                                               id="snack-@snack.Id" />
+                                        <label class="form-check-label ms-2 w-100" for="snack-@snack.Id">
+                                            <div class="snack-info">
+                                                <span class="fw-medium">@snack.Name</span>
+                                                <span class="description">@snack.Description</span>
+                                                <span class="badge bg-primary rounded-pill">@snack.Price.ToString("N0") VND</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            
+
+            <!-- Tổng tiền -->
+            <div class="total-section text-center">
+                <h4>
+                    @Localizer["Total"]:
+                    <span id="total-price" class="text-primary">0</span> VND
+                </h4>
+                <button id="book-btn" class="btn btn-secondary mt-3" disabled>@Localizer["BookNow"]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form ẩn gửi dữ liệu -->
+    <form id="booking-form" method="post" asp-action="ConfirmBooking">
+        <input type="hidden" name="MovieId" value="@Model.MovieId" />
+        <input type="hidden" name="MovieTitle" value="@Model.MovieTitle" />
+        <input type="hidden" name="TicketPrice" value="@Model.TicketPrice" />
+        <input type="hidden" name="ShowtimeId" value="@Model.ShowtimeId" />
+        <input type="hidden" name="SeatNumbers" id="selected-seats" />
+        <div id="snack-inputs"></div>
+    </form>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const seatContainer = document.getElementById("seat-container");
+            const totalPriceElement = document.getElementById("total-price");
+            const bookButton = document.getElementById("book-btn");
+            const seatPrice = @Model.TicketPrice;
+            const bookedSeats = @Html.Raw(bookedSeatsJson);
+            const selectedSeatsArray = [];
+            const snackInputsContainer = document.getElementById("snack-inputs");
+
+            // Vẽ ghế
+            const rowLabels = ['A', 'B', 'C', 'D', 'E'];
+            rowLabels.forEach(row => {
+                for (let col = 1; col <= 8; col++) {
+                    const seatId = `${row}${col}`;
+                    const seatElement = document.createElement("div");
+                    seatElement.classList.add("seat");
+                    seatElement.dataset.id = seatId;
+
+                    const seatLabel = document.createElement("span");
+                    seatLabel.classList.add("seat-label");
+                    seatLabel.textContent = seatId;
+                    seatElement.appendChild(seatLabel);
+
+                    if (bookedSeats.includes(seatId)) {
+                        seatElement.classList.add("occupied");
+                    }
+
+                    seatElement.addEventListener("click", () => {
+                        if (seatElement.classList.contains("occupied")) return;
+
+                        const index = selectedSeatsArray.indexOf(seatId);
+                        if (index === -1) {
+                            selectedSeatsArray.push(seatId);
+                            seatElement.classList.add("selected");
+                        } else {
+                            selectedSeatsArray.splice(index, 1);
+                            seatElement.classList.remove("selected");
+                        }
+                        updateTotal();
+                    });
+
+                    seatContainer.appendChild(seatElement);
+                }
+            });
+
+            // Combo checkbox change event
+            document.querySelectorAll('.snack-checkbox').forEach(cb => {
+                cb.addEventListener("change", updateTotal);
+            });
+
+            function updateTotal() {
+                const seatTotal = selectedSeatsArray.length * seatPrice;
+                let comboTotal = 0;
+
+                // Tính giá combo
+                document.querySelectorAll('.snack-checkbox:checked').forEach(cb => {
+                    comboTotal += parseInt(cb.dataset.price || 0);
+                });
+
+                const total = seatTotal + comboTotal;
+                totalPriceElement.textContent = total.toLocaleString("vi-VN");
+
+                // Cập nhật trạng thái nút
+                bookButton.disabled = selectedSeatsArray.length === 0;
+                bookButton.className = selectedSeatsArray.length > 0
+                    ? "btn btn-primary mt-3"
+                    : "btn btn-secondary mt-3";
+
+                // Cập nhật ghế đã chọn vào form
+                document.getElementById("selected-seats").value = selectedSeatsArray.join(',');
+
+                // Cập nhật combo đã chọn vào form
+                snackInputsContainer.innerHTML = ""; // clear cũ
+                document.querySelectorAll('.snack-checkbox:checked').forEach(cb => {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "SelectedSnackIds";
+                    input.value = cb.value;
+                    snackInputsContainer.appendChild(input);
+                });
+            }
+
+            bookButton.addEventListener("click", () => {
+                if (selectedSeatsArray.length === 0) {
+                    alert("@Localizer["PleaseSelectSeat"]");
+                    return;
+                }
+
+                const seatList = selectedSeatsArray.join(', ');
+                const comboItems = Array.from(document.querySelectorAll('.snack-checkbox:checked'))
+                    .map(cb => cb.nextElementSibling.textContent.trim())
+                    .join(', ');
+
+                const seatTotal = selectedSeatsArray.length * seatPrice;
+                let comboTotal = 0;
+                document.querySelectorAll('.snack-checkbox:checked').forEach(cb => {
+                    comboTotal += parseInt(cb.dataset.price || 0);
+                });
+                const total = seatTotal + comboTotal;
+
+                const message =
+                    `🎬 Xác nhận đặt vé\n` +
+                    `Phim: @Html.Raw(Model.MovieTitle.Replace("'", "\\'"))\n` +
+                    `Ghế: ${seatList}\n` +
+                    `Combo: ${comboItems || "Không"}\n` +
+                    `Tổng tiền: ${total.toLocaleString('vi-VN')} VND\n\n` +
+                    `Bạn có muốn tiếp tục đặt vé?`;
+
+                if (confirm(message)) {
+                    document.getElementById("booking-form").submit();
+                }
+            });
+
+            // Khởi tạo
+            totalPriceElement.textContent = "0";
+            bookButton.disabled = true;
+        });
+    </script>
+    <script src="~/js/movie.js"></script>
+</body>
+</html>

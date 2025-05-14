@@ -1,0 +1,70 @@
+﻿body {
+    background: radial-gradient(circle, #1a1a1a, #000);
+    font-family: 'Inter', sans-serif;
+}
+
+.register-box {
+    background-color: #111;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    width: 100%;
+    max-width: 400px;
+    color: #fff;
+}
+
+    .register-box h2 {
+        font-weight: 600;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+.form-control,
+.form-select {
+    background-color: #222;
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+}
+
+    .form-control::placeholder {
+        color: #aaa;
+    }
+
+    .form-select option {
+        background-color: #222;
+        color: #fff;
+    }
+
+.btn-register {
+    background-color: #7c3aed;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-register:hover {
+        background-color: #5b21b6;
+    }
+
+.text-danger {
+    font-size: 13px;
+    margin-top: 5px;
+    display: block;
+}
+
+a.text-light {
+    color: #aaa !important;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+    a.text-light:hover {
+        color: #fff !important;
+    }

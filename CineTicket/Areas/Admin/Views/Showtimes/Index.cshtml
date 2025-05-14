@@ -1,0 +1,69 @@
+﻿@model IEnumerable<CineTicket.Models.Showtime>
+
+@{
+    ViewData["Title"] = "Danh sách suất chiếu";
+}
+
+<h2 class="text-dark mb-4">@ViewData["Title"]</h2>
+
+<a asp-action="Add" class="btn btn-primary mb-3">Thêm suất chiếu</a>
+
+<div class="table-responsive">
+    <table id="showtimesTable" class="table table-hover table-striped table-bordered text-light align-middle" style="width:100%">
+        <thead class="table-secondary text-dark">
+            <tr>
+                <th>Thời gian</th>
+                <th>Phim</th>
+                <th>Phòng</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@item.Movie?.Title</td>
+                    <td>@item.Room?.Name</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" onclick="return confirm('Bạn chắc chắn muốn xóa?');">Xóa</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#showtimesTable').DataTable({
+                pageLength: 10, // Hiển thị mặc định 10 dòng
+                lengthMenu: [5, 10, 25, 50],
+                language: {
+                    search: "🔍 Tìm kiếm:",
+                    lengthMenu: "Hiển thị _MENU_ dòng",
+                    info: "Đang xem _START_ đến _END_ trong _TOTAL_ mục",
+                    infoEmpty: "Không có dữ liệu",
+                    zeroRecords: "Không tìm thấy kết quả phù hợp",
+                    paginate: {
+                        previous: "Trước",
+                        next: "Sau"
+                    }
+                },
+                responsive: true
+            });
+        });
+    </script>
+}

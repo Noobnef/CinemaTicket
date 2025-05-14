@@ -1,0 +1,19 @@
+﻿@model CineTicket.Models.Snack
+@{
+    ViewData["Title"] = "Xoá combo";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h2>Bạn có chắc chắn muốn xoá combo này?</h2>
+
+<div class="mb-4">
+    <strong>Tên combo:</strong> @Model.Name<br />
+    <strong>Giá:</strong> @Model.Price.ToString("N0") VND<br />
+    <strong>Mô tả:</strong> @Model.Description
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Xoá</button>
+    <a asp-action="Index" class="btn btn-secondary">Huỷ</a>
+</form>

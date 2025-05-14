@@ -1,0 +1,49 @@
+﻿@model CineTicket.Models.Ticket
+@{
+    ViewData["Title"] = "Cập nhật vé";
+}
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="row g-3">
+
+        <div class="col-md-6">
+            <label asp-for="ShowtimeId" class="form-label"></label>
+            <select asp-for="ShowtimeId" asp-items="ViewBag.Showtimes" class="form-select"></select>
+            <span asp-validation-for="ShowtimeId" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="SeatNumber" class="form-label"></label>
+            <input asp-for="SeatNumber" class="form-control" />
+            <span asp-validation-for="SeatNumber" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Price" class="form-label"></label>
+            <input asp-for="Price" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="UserId" class="form-label"></label>
+            <select asp-for="UserId" asp-items="ViewBag.Users" class="form-select"></select>
+            <span asp-validation-for="UserId" class="text-danger"></span>
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">Cập nhật</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,66 @@
+﻿@model List<CineTicket.Models.ThongKeDoanhThu>
+@{
+    ViewData["Title"] = "Thống kê doanh thu";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var labels = Model.Select(m => m.Date.ToString("dd/MM")).ToArray();
+    var revenues = Model.Select(m => m.TotalRevenue).ToArray();
+}
+
+<h2 class="mb-4">📊 Thống kê doanh thu theo ngày</h2>
+
+<canvas id="revenueChart" height="120"></canvas>
+
+<hr />
+
+<table class="table table-bordered mt-4">
+    <thead class="table-light">
+        <tr>
+            <th>Ngày</th>
+            <th>Số vé bán</th>
+            <th>Doanh thu (VND)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                <td>@item.TicketsSold</td>
+                <td>@item.TotalRevenue.ToString("N0")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(labels)),
+                datasets: [{
+                    label: 'Doanh thu (VND)',
+                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(revenues)),
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString("vi-VN") + ' ₫';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
