@@ -1,7 +1,7 @@
 ﻿using CineTicket.Models;
+using CineTicket.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CineTicket.Areas.Admin.Controllers
 {
@@ -9,16 +9,16 @@ namespace CineTicket.Areas.Admin.Controllers
     [Authorize(Roles = "Admin,Employee")]
     public class MoviesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IMovieAdminRepository _movieRepo;
 
-        public MoviesController(ApplicationDbContext context)
+        public MoviesController(IMovieAdminRepository movieRepo)
         {
-            _context = context;
+            _movieRepo = movieRepo;
         }
 
         public async Task<IActionResult> Index()
         {
-            var movies = await _context.Movies.ToListAsync();
+            var movies = await _movieRepo.GetAllMoviesAsync();
             return View(movies);
         }
 
@@ -41,25 +41,23 @@ namespace CineTicket.Areas.Admin.Controllers
                         Console.WriteLine($"Field: {kvp.Key}, Error: {error.ErrorMessage}");
                     }
                 }
-
                 return View(movie);
             }
 
-            _context.Movies.Add(movie);
-            await _context.SaveChangesAsync();
+            await _movieRepo.AddMovieAsync(movie);
+            await _movieRepo.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _movieRepo.GetMovieByIdAsync(id);
             if (movie == null)
                 return NotFound();
             return View(movie);
         }
 
-        // POST: Admin/Movies/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Movie movie)
@@ -69,8 +67,8 @@ namespace CineTicket.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Movies.Update(movie);
-                await _context.SaveChangesAsync();
+                await _movieRepo.UpdateMovieAsync(movie);
+                await _movieRepo.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
@@ -79,7 +77,7 @@ namespace CineTicket.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _movieRepo.GetMovieByIdAsync(id);
             if (movie == null)
                 return NotFound();
 
@@ -90,11 +88,11 @@ namespace CineTicket.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _movieRepo.GetMovieByIdAsync(id);
             if (movie != null)
             {
-                _context.Movies.Remove(movie);
-                await _context.SaveChangesAsync();
+                await _movieRepo.DeleteMovieAsync(movie);
+                await _movieRepo.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
         }

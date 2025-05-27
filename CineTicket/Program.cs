@@ -17,6 +17,9 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
 
+builder.Services.AddScoped<IMovieAdminRepository, MovieAdminRepository>();
+
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");

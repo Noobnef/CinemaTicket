@@ -4,6 +4,9 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var labels = Model.Select(m => m.Date.ToString("dd/MM")).ToArray();
     var revenues = Model.Select(m => m.TotalRevenue).ToArray();
+    var ticketRevenues = Model.Select(m => m.TotalRevenue - m.SnackRevenue).ToArray();
+    var snackRevenues = Model.Select(m => m.SnackRevenue).ToArray();
+
 }
 
 <h2 class="mb-4">📊 Thống kê doanh thu theo ngày</h2>
@@ -17,7 +20,10 @@
         <tr>
             <th>Ngày</th>
             <th>Số vé bán</th>
-            <th>Doanh thu (VND)</th>
+            <th>Doanh thu vé (VND)</th>
+            <th>Số bắp nước bán</th>
+            <th>Doanh thu bắp nước (VND)</th>
+            <th>Tổng doanh thu (VND)</th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +32,9 @@
             <tr>
                 <td>@item.Date.ToString("dd/MM/yyyy")</td>
                 <td>@item.TicketsSold</td>
+                <td>@((item.TotalRevenue - item.SnackRevenue).ToString("N0"))</td>
+                <td>@item.SnacksSold</td>
+                <td>@item.SnackRevenue.ToString("N0")</td>
                 <td>@item.TotalRevenue.ToString("N0")</td>
             </tr>
         }
@@ -40,13 +49,22 @@
             type: 'bar',
             data: {
                 labels: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(labels)),
-                datasets: [{
-                    label: 'Doanh thu (VND)',
-                    data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(revenues)),
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
+                        datasets: [
+          {
+            label: 'Doanh thu vé (VND)',
+            data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ticketRevenues)),
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Doanh thu bắp nước (VND)',
+            data: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(snackRevenues)),
+            backgroundColor: 'rgba(255, 206, 86, 0.7)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1
+          }
+        ]
             },
             options: {
                 responsive: true,
