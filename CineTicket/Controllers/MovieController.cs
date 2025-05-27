@@ -1,65 +1,62 @@
 ﻿using CineTicket.Models;
+using CineTicket.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace CineTicket.Areas.Admin.Controllers;
-[Authorize]
-
-public class MovieController : Controller
-
+namespace CineTicket.Areas.Admin.Controllers
+{
+    public class MovieController : Controller
     {
-
-        private readonly ApplicationDbContext _context;
-        public MovieController(ApplicationDbContext context)
+        private readonly IMovieRepository _movieRepository;
+        public MovieController(IMovieRepository movieRepository)
         {
-            _context = context;
+            _movieRepository = movieRepository;
         }
 
-    public IActionResult Index()
-    {
-        var now = DateTime.Now;
-
-        var movies = _context.Movies
-            .Select(m => new Movie
-            {
-                Id = m.Id,
-                Title = m.Title,
-                Duration = m.Duration,
-                PosterUrl = m.PosterUrl,
-                BannerUrl = m.BannerUrl,
-                HasShowtime = _context.Showtimes.Any(s => s.MovieId == m.Id && s.StartTime > now)
-            })
-            .ToList();
-
-        return View(movies);
-    }
-
-    public IActionResult Details(int id)
+        public IActionResult Index()
         {
-            var movie = _context.Movies.FirstOrDefault(m => m.Id == id);
+            var now = DateTime.Now;
+            var movies = _movieRepository.GetAllMovies()
+                .Select(m => new Movie
+                {
+                    Id = m.Id,
+                    Title = m.Title,
+                    Duration = m.Duration,
+                    PosterUrl = m.PosterUrl,
+                    BannerUrl = m.BannerUrl,
+                    HasShowtime = _movieRepository.HasShowtime(m.Id, now)
+                })
+                .ToList();
+
+            return View(movies);
+        }
+
+        public IActionResult Details(int id)
+        {
+            var movie = _movieRepository.GetMovieById(id);
             if (movie == null)
             {
                 return NotFound();
             }
             return View(movie);
         }
+
         [HttpGet]
-        public async Task<IActionResult> Search(string term)
+        public IActionResult Search(string term)
         {
             if (string.IsNullOrWhiteSpace(term))
                 return Json(new List<object>());
 
-            var results = await _context.Movies
-                .Where(m => EF.Functions.Like(m.Title, $"%{term}%"))
+            var results = _movieRepository.SearchMovies(term)
                 .Select(m => new
                 {
-                    label = m.Title,   
+                    label = m.Title,
                     value = m.Id
                 })
                 .Take(10)
-                .ToListAsync();
+                .ToList();
 
             return Json(results);
         }
     }
+}

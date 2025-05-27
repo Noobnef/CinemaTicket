@@ -1,24 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CineTicket.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using PdfSharpCore.Pdf;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Drawing.Layout;
 using CineTicket.Repositories;
 using CineTicket.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using CineTicket.Models.ViewModels;
+using PdfSharpCore.Pdf;
+using PdfSharpCore.Drawing;
 
 public class BookingController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IBookingRepository _bookingRepo;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IGmailSender _gmailSender;
 
-    public BookingController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IGmailSender gmailSender)
+    public BookingController(
+        IBookingRepository bookingRepo,
+        UserManager<ApplicationUser> userManager,
+        IGmailSender gmailSender)
     {
-        _context = context;
+        _bookingRepo = bookingRepo;
         _userManager = userManager;
         _gmailSender = gmailSender;
     }
@@ -26,16 +27,13 @@ public class BookingController : Controller
     // Chọn suất chiếu
     public IActionResult Index(int movieId, int? showtimeId)
     {
-        var movie = _context.Movies.FirstOrDefault(m => m.Id == movieId);
+        var movie = _bookingRepo.GetMovie(movieId);
         if (movie == null)
             return NotFound("Không tìm thấy phim.");
 
         if (!showtimeId.HasValue)
         {
-            var showtimes = _context.Showtimes
-                .Where(s => s.MovieId == movieId && s.StartTime > DateTime.Now)
-                .OrderBy(s => s.StartTime)
-                .ToList();
+            var showtimes = _bookingRepo.GetShowtimes(movieId);
 
             if (!showtimes.Any())
                 return BadRequest("Phim này chưa có suất chiếu.");
@@ -48,17 +46,12 @@ public class BookingController : Controller
             });
         }
 
-        var selectedShowtime = _context.Showtimes
-            .Include(s => s.Room)
-            .FirstOrDefault(s => s.Id == showtimeId.Value && s.MovieId == movieId);
+        var selectedShowtime = _bookingRepo.GetShowtimeWithRoom(showtimeId.Value, movieId);
 
         if (selectedShowtime == null)
             return BadRequest("Suất chiếu không hợp lệ.");
 
-        var bookedSeats = _context.Tickets
-            .Where(t => t.ShowtimeId == selectedShowtime.Id)
-            .Select(t => t.SeatNumber)
-            .ToList();
+        var bookedSeats = _bookingRepo.GetBookedSeats(selectedShowtime.Id);
 
         var booking = new BookingViewModel
         {
@@ -67,7 +60,7 @@ public class BookingController : Controller
             TicketPrice = selectedShowtime.Room.TicketPrice,
             ShowtimeId = selectedShowtime.Id,
             AlreadyBookedSeats = bookedSeats,
-            AvailableSnacks = _context.Snacks.ToList()
+            AvailableSnacks = _bookingRepo.GetSnacks()
         };
 
         return View(booking);
@@ -87,28 +80,27 @@ public class BookingController : Controller
         decimal totalPrice = model.TicketPrice * seats.Length;
 
         // Thêm vé vào cơ sở dữ liệu
-        foreach (var seat in seats)
+        var tickets = seats.Select(seat => new Ticket
         {
-            var ticket = new Ticket
-            {
-                ShowtimeId = model.ShowtimeId,
-                SeatNumber = seat,
-                Price = model.TicketPrice,
-                BookingTime = DateTime.Now,
-                UserId = userId
-            };
-            _context.Tickets.Add(ticket);
-        }
+            ShowtimeId = model.ShowtimeId,
+            SeatNumber = seat,
+            Price = model.TicketPrice,
+            BookingTime = DateTime.Now,
+            UserId = userId
+        }).ToList();
+
+        await _bookingRepo.AddTicketsAsync(tickets);
 
         // Thêm bắp nước
+        var snackOrders = new List<SnackOrder>();
         if (model.SelectedSnackIds != null && model.SelectedSnackIds.Any())
         {
             foreach (var snackId in model.SelectedSnackIds)
             {
-                var snack = await _context.Snacks.FindAsync(snackId);
+                var snack = await _bookingRepo.FindSnackAsync(snackId);
                 if (snack != null)
                 {
-                    var snackOrder = new SnackOrder
+                    snackOrders.Add(new SnackOrder
                     {
                         SnackId = snack.Id,
                         Quantity = 1,
@@ -116,11 +108,11 @@ public class BookingController : Controller
                         BookingTime = DateTime.Now,
                         UserId = userId,
                         ShowtimeId = model.ShowtimeId
-                    };
-                    _context.SnackOrder.Add(snackOrder);
+                    });
                     totalPrice += snack.Price;
                 }
             }
+            await _bookingRepo.AddSnackOrdersAsync(snackOrders);
         }
 
         // Lưu vào lịch sử đặt vé
@@ -132,12 +124,12 @@ public class BookingController : Controller
             TotalAmount = totalPrice,
             BookingDate = DateTime.Now
         };
-        _context.BookingHistories.Add(history);
+        await _bookingRepo.AddBookingHistoryAsync(history);
 
-        await _context.SaveChangesAsync();
+        await _bookingRepo.SaveChangesAsync();
 
         // Gửi email xác nhận
-        var movie = await _context.Movies.FindAsync(model.MovieId);
+        var movie = await _bookingRepo.FindMovieAsync(model.MovieId);
         var pdfBytes = GenerateTicketPdf(movie.Title, model.SeatNumbers, totalPrice);
 
         if (User.Identity.IsAuthenticated)
@@ -159,17 +151,14 @@ public class BookingController : Controller
     {
         var userId = _userManager.GetUserId(User);
 
-        var latestHistory = await _context.BookingHistories
-            .Where(h => h.UserId == userId)
-            .Include(h => h.Showtime)
-                .ThenInclude(s => s.Movie)
-            .OrderByDescending(h => h.BookingDate)
-            .FirstOrDefaultAsync();
+        var latestHistory = await _bookingRepo.GetLatestBookingHistoryAsync(userId);
 
         if (latestHistory == null)
         {
             return View(new List<CartItemViewModel>());
         }
+
+        var snackNames = await _bookingRepo.GetSnackNamesForHistoryAsync(userId, latestHistory.ShowtimeId, latestHistory.BookingDate);
 
         var cartItem = new CartItemViewModel
         {
@@ -178,19 +167,11 @@ public class BookingController : Controller
             SeatNumbers = latestHistory.SeatNumbers,
             TotalAmount = latestHistory.TotalAmount,
             BookingDate = latestHistory.BookingDate,
-            SnackNames = await _context.SnackOrder
-                .Where(s => s.UserId == userId
-                         && s.ShowtimeId == latestHistory.ShowtimeId
-             && EF.Functions.DateDiffSecond(s.BookingTime, latestHistory.BookingDate) <= 5)
-                .Include(s => s.Snack)
-                .Select(s => s.Snack.Name)
-                .ToListAsync()
+            SnackNames = snackNames
         };
 
         return View(new List<CartItemViewModel> { cartItem });
     }
-
-
 
     // Trang thành công
     public IActionResult Success()
@@ -222,4 +203,3 @@ public class BookingController : Controller
         return ms.ToArray();
     }
 }
-

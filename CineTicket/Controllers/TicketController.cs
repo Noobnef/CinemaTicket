@@ -1,16 +1,18 @@
 ﻿using CineTicket.Models;
 using Microsoft.AspNetCore.Mvc;
-
-
+using CineTicket.Repositories; 
 public class TicketController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ITicketRepository _ticketRepository;
 
-    public TicketController(ApplicationDbContext context) { _context = context; }
+    public TicketController(ITicketRepository ticketRepository)
+    {
+        _ticketRepository = ticketRepository;
+    }
 
     public IActionResult Book(int showtimeId)
     {
-        var showtime = _context.Showtimes.FirstOrDefault(s => s.Id == showtimeId);
+        var showtime = _ticketRepository.GetShowtime(showtimeId);
         if (showtime == null) return NotFound();
 
         return View(showtime);
@@ -20,11 +22,9 @@ public class TicketController : Controller
     public IActionResult Book(int showtimeId, string seatNumber)
     {
         var ticket = new Ticket { ShowtimeId = showtimeId, SeatNumber = seatNumber };
-        _context.Tickets.Add(ticket);
-        _context.SaveChanges();
+        _ticketRepository.AddTicket(ticket);
+        _ticketRepository.SaveChanges();
 
         return RedirectToAction("Index", "Movie");
     }
-
-
 }

@@ -1,46 +1,48 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CineTicket.Models;
-using SQLitePCL;
+using CineTicket.Repositories;
 
-namespace CineTicket.Controllers;
-
-public class HomeController : Controller
+namespace CineTicket.Controllers
 {
-    private readonly ILogger<HomeController> _logger;
-    private readonly ApplicationDbContext _context;
-
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+    public class HomeController : Controller
     {
-        _logger = logger;
-        _context = context;
-    }
+        private readonly ILogger<HomeController> _logger;
+        private readonly IMovieRepository _movieRepository;
 
-    public IActionResult Index()
-    {
-        var movies = _context.Movies.OrderByDescending(m => m.ReleaseDate).ToList();
-        return View(movies);
-    }
+        public HomeController(ILogger<HomeController> logger, IMovieRepository movieRepository)
+        {
+            _logger = logger;
+            _movieRepository = movieRepository;
+        }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        public IActionResult Index()
+        {
+            var movies = _movieRepository.GetAllMovies()
+                .OrderByDescending(m => m.ReleaseDate)
+                .ToList();
+            return View(movies);
+        }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+        public IActionResult Privacy()
+        {
+            return View();
+        }
 
-    public IActionResult About()
-    {
-        return View();
-    }
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult About()
+        {
+            return View();
+        }
+
         public IActionResult AccessDenied()
         {
             return View();
         }
-    
-
+    }
 }

@@ -12,6 +12,11 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
