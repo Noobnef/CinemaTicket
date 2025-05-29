@@ -10,6 +10,37 @@ namespace CineTicket.Repositories
         {
             _context = context;
         }
+        // Lấy đơn gần nhất CHƯA THANH TOÁN
+        public async Task<BookingHistory> GetLatestUnpaidBookingHistoryAsync(string userId)
+        {
+            return await _context.BookingHistories
+                .Where(h => h.UserId == userId && !h.IsPaid)
+                .OrderByDescending(h => h.BookingDate)
+                .FirstOrDefaultAsync();
+        }
+
+        // Lấy đơn gần nhất bất kỳ (cho Cart)
+        public async Task<BookingHistory> GetLatestBookingHistoryAsync(string userId)
+        {
+            return await _context.BookingHistories
+                .Include(x => x.Showtime)
+                    .ThenInclude(x => x.Movie)
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.BookingDate)
+                .FirstOrDefaultAsync();
+        }
+        // Cập nhật trạng thái đã thanh toán
+        public async Task UpdateBookingHistoryPaidAsync(string orderId)
+        {
+            var history = await _context.BookingHistories
+                .FirstOrDefaultAsync(h => h.OrderId == orderId);
+            if (history != null)
+            {
+                history.IsPaid = true;
+                await _context.SaveChangesAsync();
+            }
+        }
+
 
         public Movie GetMovie(int movieId)
         {
@@ -74,15 +105,7 @@ namespace CineTicket.Repositories
             return await _context.Movies.FindAsync(movieId);
         }
 
-        public async Task<BookingHistory> GetLatestBookingHistoryAsync(string userId)
-        {
-            return await _context.BookingHistories
-                .Where(h => h.UserId == userId)
-                .Include(h => h.Showtime)
-                    .ThenInclude(s => s.Movie)
-                .OrderByDescending(h => h.BookingDate)
-                .FirstOrDefaultAsync();
-        }
+        
 
         public async Task<List<string>> GetSnackNamesForHistoryAsync(string userId, int showtimeId, DateTime bookingDate)
         {
@@ -94,5 +117,21 @@ namespace CineTicket.Repositories
                 .Select(s => s.Snack.Name)
                 .ToListAsync();
         }
+
+        public async Task<BookingHistory> GetBookingHistoryByIdAsync(int id, string userId)
+        {
+            return await _context.BookingHistories
+                .Include(x => x.Showtime).ThenInclude(x => x.Movie)
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        }
+
+
+        public async Task<BookingHistory> GetBookingHistoryByOrderIdAsync(string orderId, string userId)
+        {
+            return await _context.BookingHistories
+                .Include(x => x.Showtime).ThenInclude(x => x.Movie)
+                .FirstOrDefaultAsync(x => x.OrderId == orderId && x.UserId == userId);
+        }
+
     }
 }

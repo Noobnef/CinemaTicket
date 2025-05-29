@@ -8,10 +8,10 @@ using CineTicket.Models.ViewModels;
 using PdfSharpCore.Pdf;
 using PdfSharpCore.Drawing;
 using CineTicket.Payment;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
+using System.Text;
+using System.IO;
+using System.Threading.Tasks;
 
 public class BookingController : Controller
 {
@@ -76,15 +76,12 @@ public class BookingController : Controller
     public async Task<IActionResult> ConfirmBooking(BookingViewModel model)
     {
         if (string.IsNullOrEmpty(model.SeatNumbers))
-        {
             return RedirectToAction("Index", new { movieId = model.MovieId, showtimeId = model.ShowtimeId });
-        }
 
         var seats = model.SeatNumbers.Split(',');
         var userId = User.Identity.IsAuthenticated ? _userManager.GetUserId(User) : null;
         decimal totalPrice = model.TicketPrice * seats.Length;
 
-        // Thêm vé vào cơ sở dữ liệu
         var tickets = seats.Select(seat => new Ticket
         {
             ShowtimeId = model.ShowtimeId,
@@ -96,7 +93,6 @@ public class BookingController : Controller
 
         await _bookingRepo.AddTicketsAsync(tickets);
 
-        // Thêm bắp nước
         var snackOrders = new List<SnackOrder>();
         if (model.SelectedSnackIds != null && model.SelectedSnackIds.Any())
         {
@@ -127,36 +123,35 @@ public class BookingController : Controller
             ShowtimeId = model.ShowtimeId,
             SeatNumbers = model.SeatNumbers,
             TotalAmount = totalPrice,
-            BookingDate = DateTime.Now
+            BookingDate = DateTime.Now,
+            IsPaid = false // chưa thanh toán
         };
         await _bookingRepo.AddBookingHistoryAsync(history);
+        await _bookingRepo.SaveChangesAsync(); // Đảm bảo history.Id đã sinh ra
 
-        await _bookingRepo.SaveChangesAsync();
-
-        // Gửi email xác nhận
-        var movie = await _bookingRepo.FindMovieAsync(model.MovieId);
-        var pdfBytes = GenerateTicketPdf(movie.Title, model.SeatNumbers, totalPrice);
-
-        if (User.Identity.IsAuthenticated)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            await _gmailSender.SendEmailWithAttachmentAsync(user.Email, "Vé xem phim CineTicket",
-                $"Cảm ơn bạn đã đặt vé cho phim: {movie.Title}. " +
-                $"Ghế: {model.SeatNumbers}. " +
-                $"Tổng tiền: {totalPrice:N0} VND.",
-                pdfBytes, "ve-phim.pdf");
-        }
-
-        return RedirectToAction("Cart");
+        // Redirect sang Cart với bookingId vừa lưu
+        return RedirectToAction("Cart", new { bookingId = history.Id });
     }
 
-    // Giỏ hàng
+    // Giỏ hàng - chỉ lấy đúng bookingId vừa đặt hoặc orderId khi vừa thanh toán xong
     [Authorize]
-    public async Task<IActionResult> Cart()
+    public async Task<IActionResult> Cart(int? bookingId = null, string orderId = null)
     {
         var userId = _userManager.GetUserId(User);
+        BookingHistory latestHistory = null;
 
-        var latestHistory = await _bookingRepo.GetLatestBookingHistoryAsync(userId);
+        if (!string.IsNullOrEmpty(orderId))
+        {
+            latestHistory = await _bookingRepo.GetBookingHistoryByOrderIdAsync(orderId, userId);
+        }
+        else if (bookingId.HasValue)
+        {
+            latestHistory = await _bookingRepo.GetBookingHistoryByIdAsync(bookingId.Value, userId);
+        }
+        else
+        {
+            latestHistory = await _bookingRepo.GetLatestBookingHistoryAsync(userId);
+        }
 
         if (latestHistory == null)
         {
@@ -167,133 +162,107 @@ public class BookingController : Controller
 
         var cartItem = new CartItemViewModel
         {
-            MovieTitle = latestHistory.Showtime.Movie.Title,
-            Showtime = latestHistory.Showtime.StartTime,
+            Id = latestHistory.Id,
+            BookingId = latestHistory.Id,
+            MovieTitle = latestHistory.Showtime?.Movie?.Title,
+            Showtime = latestHistory.Showtime?.StartTime ?? DateTime.MinValue,
             SeatNumbers = latestHistory.SeatNumbers,
             TotalAmount = latestHistory.TotalAmount,
             BookingDate = latestHistory.BookingDate,
-            SnackNames = snackNames
+            SnackNames = snackNames,
+            IsPaid = latestHistory.IsPaid
         };
 
         return View(new List<CartItemViewModel> { cartItem });
     }
 
-    // Trang thành công
+    // ========================== XỬ LÝ MOMO =======================================
+    [Authorize]
+    public async Task<IActionResult> Momo(int bookingId)
+    {
+        var userId = _userManager.GetUserId(User);
+        var history = await _bookingRepo.GetBookingHistoryByIdAsync(bookingId, userId);
+
+        if (history == null || history.IsPaid)
+        {
+            return BadRequest("Không tìm thấy đơn hợp lệ hoặc đã thanh toán.");
+        }
+
+        string amount = ((int)history.TotalAmount).ToString();
+        string orderid = $"{history.Id}_{DateTime.Now.Ticks}";
+        history.OrderId = orderid;  // Lưu OrderId vào DB
+        await _bookingRepo.SaveChangesAsync();
+
+        string requestId = DateTime.Now.Ticks.ToString();
+        string extraData = "";
+
+        string endpoint = "https://test-payment.momo.vn/gw_payment/transactionProcessor";
+        string partnerCode = "MOMOOJOI20210710";
+        string accessKey = "iPXneGmrJH0G8FOP";
+        string serectkey = "sFcbSGRSJjwGxwhhcEktCHWYUuTuPNDB";
+        string orderInfo = $"Thanh toán vé xem phim - Đơn {orderid}";
+        string domain = $"{Request.Scheme}://{Request.Host}";
+        string returnUrl = $"{domain}/Booking/Success";
+        string notifyurl = $"{domain}/Booking/MomoSavePayment";
+
+        string rawHash = $"partnerCode={partnerCode}&accessKey={accessKey}&requestId={requestId}&amount={amount}&orderId={orderid}&orderInfo={orderInfo}&returnUrl={returnUrl}&notifyUrl={notifyurl}&extraData={extraData}";
+
+        MoMoSecurity crypto = new MoMoSecurity();
+        string signature = crypto.signSHA256(rawHash, serectkey);
+
+        JObject message = new JObject
+        {
+            { "partnerCode", partnerCode },
+            { "accessKey", accessKey },
+            { "requestId", requestId },
+            { "amount", amount },
+            { "orderId", orderid },
+            { "orderInfo", orderInfo },
+            { "returnUrl", returnUrl },
+            { "notifyUrl", notifyurl },
+            { "extraData", extraData },
+            { "requestType", "captureMoMoWallet" },
+            { "signature", signature }
+        };
+
+        string responseFromMomo = MomoPaymentRequest.sendPaymentRequest(endpoint, message.ToString());
+        JObject jmessage = JObject.Parse(responseFromMomo);
+
+        if (jmessage["payUrl"] == null || string.IsNullOrEmpty(jmessage["payUrl"].ToString()))
+        {
+            System.Diagnostics.Debug.WriteLine("MoMo trả về lỗi: " + responseFromMomo);
+            return Content("Lỗi MoMo (không có payUrl): <pre>" + responseFromMomo + "</pre>");
+        }
+
+        return Redirect(jmessage.GetValue("payUrl").ToString());
+    }
+
+    // Callback server to server từ Momo (notifyUrl)
+    [HttpPost]
+    public async Task<IActionResult> MomoSavePayment()
+    {
+        using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+        {
+            var body = await reader.ReadToEndAsync();
+            var json = JObject.Parse(body);
+
+            string orderId = json["orderId"]?.ToString();
+            string errorCode = json["errorCode"]?.ToString();
+
+            if (errorCode == "0")
+            {
+                await _bookingRepo.UpdateBookingHistoryPaidAsync(orderId);
+            }
+
+            return Ok(new { message = "Payment received" });
+        }
+    }
+
     public IActionResult Success()
     {
         return View();
     }
 
-    // Tạo PDF vé
-    private byte[] GenerateTicketPdf(string movie, string seats, decimal amount)
-    {
-        using var ms = new MemoryStream();
-        var doc = new PdfDocument();
-        var page = doc.AddPage();
-        var gfx = XGraphics.FromPdfPage(page);
 
-        var font = new XFont("Arial", 14);
-        var brush = XBrushes.Black;
 
-        string content = $"\uD83C\uDFAC Vé Xem Phim\n" +
-                         $"Phim: {movie}\n" +
-                         $"Ghế: {seats}\n" +
-                         $"Tổng tiền: {amount:N0} VND\n" +
-                         $"Ngày đặt: {DateTime.Now:dd/MM/yyyy HH:mm}";
-
-        var rect = new XRect(40, 40, page.Width - 80, page.Height - 80);
-        gfx.DrawString(content, font, brush, rect, XStringFormats.TopLeft);
-
-        doc.Save(ms);
-        return ms.ToArray();
-    }
-
-    public ActionResult Momo()
-    {
-
-        //request params need to request to MoMo system
-        string endpoint = "https://test-payment.momo.vn/gw_payment/transactionProcessor";
-        string partnerCode = "MOMOOJOI20210710";
-        string accessKey = "iPXneGmrJH0G8FOP";
-        string serectkey = "sFcbSGRSJjwGxwhhcEktCHWYUuTuPNDB";
-        string orderInfo = "Thanh toan Cinema Ticket Hub";
-        string returnUrl =  "/Booking/MomoConfirmed";
-        string notifyurl =  "/Booking/MomoSavePayment";
-
-        //Lấy tổng tiền trong giỏ hàng
-
-        string amount = "100000";
-        string orderid = DateTime.Now.Ticks.ToString(); //mã đơn hàng
-        string requestId = DateTime.Now.Ticks.ToString();
-        string extraData = "";
-
-        //Before sign HMAC SHA256 signature
-        string rawHash = "partnerCode=" +
-            partnerCode + "&accessKey=" +
-            accessKey + "&requestId=" +
-            requestId + "&amount=" +
-            amount + "&orderId=" +
-            orderid + "&orderInfo=" +
-            orderInfo + "&returnUrl=" +
-            returnUrl + "&notifyUrl=" +
-            notifyurl + "&extraData=" +
-            extraData;
-
-        MoMoSecurity crypto = new MoMoSecurity();
-        //sign signature SHA256
-        string signature = crypto.signSHA256(rawHash, serectkey);
-
-        //build body json request
-        JObject message = new JObject
-            {
-                { "partnerCode", partnerCode },
-                { "accessKey", accessKey },
-                { "requestId", requestId },
-                { "amount", amount },
-                { "orderId", orderid },
-                { "orderInfo", orderInfo },
-                { "returnUrl", returnUrl },
-                { "notifyUrl", notifyurl },
-                { "extraData", extraData },
-                { "requestType", "captureMoMoWallet" },
-                { "signature", signature }
-
-            };
-
-        string responseFromMomo = MomoPaymentRequest.sendPaymentRequest(endpoint, message.ToString());
-
-        JObject jmessage = JObject.Parse(responseFromMomo);
-
-        return Redirect(jmessage.GetValue("payUrl").ToString());
-    }
-
-    //Khi thanh toán xong ở cổng thanh toán Momo, Momo sẽ trả về một số thông tin, trong đó có errorCode để check thông tin thanh toán
-    //errorCode = 0 : thanh toán thành công (Request.QueryString["errorCode"])
-    //Tham khảo bảng mã lỗi tại: https://developers.momo.vn/#/docs/aio/?id=b%e1%ba%a3ng-m%c3%a3-l%e1%bb%97i
-    public ActionResult MomoConfirmed(CineTicket.Payment.MomoResult result)
-    {
-        //lấy kết quả Momo trả về và hiển thị thông báo cho người dùng (có thể lấy dữ liệu ở đây cập nhật xuống db)
-        string rMessage = result.message;
-        string rOrderId = result.orderId;
-        string rErrorCode = result.errorCode; // = 0: thanh toán thành công
-        ViewBag.MomoStatus = rErrorCode;
-        ViewBag.Message = "Hóa đơn: " + rOrderId;
-
-        if (rErrorCode == "0")
-        {
-            
-        }
-        else
-        {
-           
-        }
-        return View();
-    }
-
-    [HttpPost]
-    public void MomoSavePayment()
-    {
-        //cập nhật dữ liệu vào db
-        String a = "";
-    }
 }

@@ -17,5 +17,10 @@ namespace CineTicket.Repositories
         Task<Movie> FindMovieAsync(int movieId);
         Task<BookingHistory> GetLatestBookingHistoryAsync(string userId);
         Task<List<string>> GetSnackNamesForHistoryAsync(string userId, int showtimeId, DateTime bookingDate);
+        Task UpdateBookingHistoryPaidAsync(string orderId);
+        Task<BookingHistory> GetLatestUnpaidBookingHistoryAsync(string userId);
+        Task<BookingHistory> GetBookingHistoryByIdAsync(int id, string userId);
+        Task<BookingHistory> GetBookingHistoryByOrderIdAsync(string orderId, string userId);
+
     }
 }

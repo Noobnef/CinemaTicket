@@ -1,5 +1,5 @@
 ﻿@model List<CineTicket.ViewModels.CartItemViewModel>
-
+<link href="~/css/momo.css" rel="stylesheet" />
 <div class="confirmation-page py-4">
     <div class="confirmation-header text-center mb-5">
         <div class="d-inline-block position-relative">
@@ -81,14 +81,22 @@
                         </div>
                     </div>
 
-                    <div class="ticket-actions">
-                        <button class="btn action-btn print-btn" onclick="window.print()">
-                            <i class="bi bi-printer"></i> In vé
+                    <div class="ticket-actions d-flex flex-wrap gap-2 mt-3 align-items-center">
+                        <button class="btn btn-outline-secondary d-flex align-items-center" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i> In vé
                         </button>
-                        <button class="btn action-btn download-btn" onclick="saveAsPDF()">
-                            <i class="bi bi-download"></i> Tải xuống
+                        <button class="btn btn-outline-primary d-flex align-items-center" onclick="saveAsPDF()">
+                            <i class="bi bi-download me-2"></i> Tải xuống
                         </button>
+                        <form method="get" action="/Booking/Momo" class="d-inline">
+                            <input type="hidden" name="bookingId" value="@item.BookingId" />
+                            <button type="submit" class="btn btn-momo d-flex align-items-center">
+                                <img src="https://static.mservice.io/img/logo-momo.png" alt="MoMo" style="height: 20px; margin-right:8px; vertical-align: middle;" />
+                                Thanh toán MoMo
+                            </button>
+                        </form>
                     </div>
+
                 </div>
             }
         </div>

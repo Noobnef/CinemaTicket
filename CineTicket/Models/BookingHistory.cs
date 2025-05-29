@@ -5,11 +5,13 @@
         public int Id { get; set; }
         public string UserId { get; set; }
         public int ShowtimeId { get; set; }
+        public string? OrderId { get; set; }
         public Showtime Showtime { get; set; } 
 
         public string SeatNumbers { get; set; }
         public decimal TotalAmount { get; set; }
         public DateTime BookingDate { get; set; }
+        public bool IsPaid { get; set; }
     }
 
 }
