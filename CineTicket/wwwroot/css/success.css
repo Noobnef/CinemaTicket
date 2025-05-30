@@ -1,0 +1,142 @@
+﻿.success-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    color: white;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+    .success-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        /* Đã xóa animation */
+    }
+
+.success-icon {
+    font-size: 5rem;
+    color: #4ade80;
+    /* Đã xóa animation */
+    text-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+}
+
+.success-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    /* Đã xóa animation */
+}
+
+.success-message {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    /* Đã xóa animation */
+}
+
+.ticket-info {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid rgba(255,255,255,0.2);
+    /* Đã xóa animation */
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+.info-label {
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+}
+
+.info-value {
+    font-weight: 700;
+    color: white;
+}
+
+.action-buttons {
+    /* Đã xóa animation */
+}
+
+.btn-gradient {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        color: white;
+    }
+
+.btn-outline-light {
+    border: 2px solid rgba(255,255,255,0.5);
+    color: white;
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+    .btn-outline-light:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.floating-element {
+    position: absolute;
+    color: rgba(255,255,255,0.1);
+    /* Đã xóa animation */
+}
+
+    .floating-element:nth-child(1) {
+        top: 10%;
+        left: 10%; /* animation-delay: 0s; */
+    }
+
+    .floating-element:nth-child(2) {
+        top: 20%;
+        right: 10%; /* animation-delay: 1s; */
+    }
+
+    .floating-element:nth-child(3) {
+        bottom: 20%;
+        left: 20%; /* animation-delay: 2s; */
+    }
+
+    .floating-element:nth-child(4) {
+        bottom: 10%;
+        right: 20%; /* animation-delay: 3s; */
+    }

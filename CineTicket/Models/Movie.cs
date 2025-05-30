@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace CineTicket.Models
 {
@@ -26,6 +27,7 @@ namespace CineTicket.Models
         public bool HasShowtime { get; set; } 
 
         public int Duration { get; set; }
+        [ValidateNever]
         public ICollection<Showtime> Showtimes { get; set; }
 
     }

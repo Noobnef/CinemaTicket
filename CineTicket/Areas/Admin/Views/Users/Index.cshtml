@@ -2,38 +2,85 @@
 
 <h2>Danh sách người dùng theo quyền</h2>
 
-@foreach (var roleGroup in new[] { "Admin", "Company", "Employee", "Customer" })
+@{
+    // Đặt key cho mỗi bảng theo tên role để làm id riêng biệt
+    string[] roles = new[] { "Admin", "Company", "Employee", "Customer" };
+}
+@foreach (var roleGroup in roles)
 {
     var usersInRole = Model.Where(u => u.Role == roleGroup).ToList();
     if (usersInRole.Any())
     {
+        var tableId = $"usersTable_{roleGroup}";
         <h3 class="mt-4 text-primary"> @roleGroup (@usersInRole.Count)</h3>
 
-        <table class="table table-bordered">
-            <thead class="table-light">
-                <tr>
-                    <th>Tên Người Dùng</th>
-                    <th>Email</th>
-                    <th>Tên tài khoản</th>
-                    <th>Quyền</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in usersInRole)
-                {
+        <div class="table-responsive">
+            <table id="@tableId" class="table table-hover table-bordered table-striped text-light align-middle" style="width:100%">
+                <thead class="table-light text-dark">
                     <tr>
-                        <td>@user.FullName</td>
-                        <td>@user.Email</td>
-                        <td>@user.UserName</td>
-                        <td>@user.Role</td>
-                        <td>
-                            <a asp-action="ManageRoles" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Chỉnh sửa quyền</a>
-                            <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger">Xóa</a>
-                        </td>
+                        <th>Tên Người Dùng</th>
+                        <th>Email</th>
+                        <th>Tên tài khoản</th>
+                        <th>Quyền</th>
+                        <th class="text-center" style="width:160px">Hành động</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var user in usersInRole)
+                    {
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>@user.UserName</td>
+                            <td>@user.Role</td>
+                            <td class="text-center">
+                                <a asp-action="ManageRoles" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary me-1">Chỉnh sửa quyền</a>
+                                <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Bạn chắc chắn muốn xoá người dùng này?')">Xóa</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
+}
+
+@section Scripts {
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Khởi tạo DataTables cho từng bảng theo role
+            ['Admin', 'Company', 'Employee', 'Customer'].forEach(function(role) {
+                var tableId = '#usersTable_' + role;
+                if ($(tableId).length) {
+                    $(tableId).DataTable({
+                        pageLength: 10,
+                        lengthMenu: [5, 10, 25, 50],
+                        language: {
+                            search: "🔍 Tìm kiếm:",
+                            lengthMenu: "Hiển thị _MENU_ dòng",
+                            info: "Đang xem _START_ đến _END_ trong _TOTAL_ người dùng",
+                            infoEmpty: "Không có dữ liệu",
+                            zeroRecords: "Không tìm thấy kết quả phù hợp",
+                            paginate: {
+                                previous: "Trước",
+                                next: "Sau"
+                            }
+                        },
+                        responsive: true
+                    });
+                }
+            });
+        });
+    </script>
 }

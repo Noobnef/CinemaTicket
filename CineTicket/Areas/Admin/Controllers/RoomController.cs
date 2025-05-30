@@ -22,24 +22,14 @@ namespace CineTicket.Areas.Admin.Controllers
             return View(rooms);
         }
 
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var room = await _context.Rooms.FirstOrDefaultAsync(m => m.Id == id);
-            if (room == null) return NotFound();
-
-            return View(room);
-        }
-
-        public IActionResult Create()
+        public IActionResult Add() // Hiển thị form
         {
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,SeatCount,TicketPrice")] Room room)
+        public async Task<IActionResult> Add([Bind("Name,TicketPrice")] Room room)
         {
             if (ModelState.IsValid)
             {
@@ -47,6 +37,16 @@ namespace CineTicket.Areas.Admin.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            return View(room);
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var room = await _context.Rooms.FirstOrDefaultAsync(m => m.Id == id);
+            if (room == null) return NotFound();
+
             return View(room);
         }
 

@@ -1,11 +1,11 @@
-﻿namespace CineTicket.Models
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace CineTicket.Models
 {
     public class Seat
     {
         public int Id { get; set; }
-        public int SeatNumber { get; set; }         
-        public string Row { get; set; }            
-
+        public int SeatNumber { get; set; }
         public int RoomId { get; set; }
         public Room Room { get; set; }
     }

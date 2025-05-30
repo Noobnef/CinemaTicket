@@ -6,6 +6,19 @@
 <link href="~/css/admin.css" rel="stylesheet" />
 <h2>Thêm phim mới</h2>
 
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
 <form asp-area="Admin" asp-controller="Movies" asp-action="Add" method="post">
     <div class="mb-3">
         <label asp-for="Title" class="form-label fw-bold"></label>
